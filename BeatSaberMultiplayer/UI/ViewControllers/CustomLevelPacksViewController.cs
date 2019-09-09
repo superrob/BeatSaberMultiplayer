@@ -12,7 +12,7 @@ namespace BeatSaberMultiplayer.UI.ViewControllers
 {
     class CustomLevelPacksViewController : VRUIViewController
     {
-        public event Action<CustomLevelPacksViewController, IBeatmapLevelPack> didSelectPackEvent;
+        public event Action<LevelPacksTableView, IBeatmapLevelPack> didSelectPackEvent;
         public int _selectedPackNum;
         protected IBeatmapLevelPackCollection _levelPackCollection;
         protected AdditionalContentModelSO _additionalContentModel;
@@ -88,7 +88,7 @@ namespace BeatSaberMultiplayer.UI.ViewControllers
                 _levelPacksTableView.SetPrivateField("_cellWidth", 30f);
                 _levelPacksTableView.SetPrivateField("_additionalContentModel", _additionalContentModel);
 
-                _levelPacksTableView.didSelectPackEvent += HandleLevelPacksTableViewDidSelectPack;
+                _levelPacksTableView.didSelectPackEvent += didSelectPackEvent;
                 _levelPacksTableView.Init();
                 for (int i = 0; i < tableView.transform.childCount; i++)
                 {
@@ -106,10 +106,6 @@ namespace BeatSaberMultiplayer.UI.ViewControllers
 
         protected override void DidDeactivate(VRUIViewController.DeactivationType deactivationType)
         {
-            if (deactivationType == VRUIViewController.DeactivationType.RemovedFromHierarchy)
-            {
-                _levelPacksTableView.didSelectPackEvent -= HandleLevelPacksTableViewDidSelectPack;
-            }
             _levelPacksTableView.CancelAsyncOperations();
             _additionalContentModel.didInvalidateDataEvent -= HandleAdditionalContentModelDidInvalidateData;
         }
@@ -128,24 +124,6 @@ namespace BeatSaberMultiplayer.UI.ViewControllers
         public virtual void HandleAdditionalContentModelDidInvalidateData()
         {
             _levelPacksTableView.RefreshPacksAvailability();
-        }
-
-        public virtual void HandleLevelPacksTableViewDidSelectPack(LevelPacksTableView levelPacksTableView, IBeatmapLevelPack pack)
-        {
-            for (int i = 0; i < _levelPackCollection.beatmapLevelPacks.Length; i++)
-            {
-                if (pack == _levelPackCollection.beatmapLevelPacks[i])
-                {
-                    _selectedPackNum = i;
-                    break;
-                }
-            }
-            Action<CustomLevelPacksViewController, IBeatmapLevelPack> action = didSelectPackEvent;
-            if (action == null)
-            {
-                return;
-            }
-            action(this, pack);
         }
     }
 }
