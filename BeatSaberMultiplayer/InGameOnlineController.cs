@@ -949,7 +949,20 @@ namespace BeatSaberMultiplayer
                 Plugin.log.Warn("\nScore submission is disabled! Reason:\n" + string.Join(",\n", reasons));
                 return;
             }
+            
+            AchievementsEvaluationHandler achievementsHandler = Resources.FindObjectsOfTypeAll<AchievementsEvaluationHandler>().First();
+            achievementsHandler.ProcessLevelFinishData(difficultyBeatmap, levelCompletionResults);
+            achievementsHandler.ProcessSoloFreePlayLevelFinishData(difficultyBeatmap, levelCompletionResults);
 
+            SoloFreePlayFlowCoordinator freePlayCoordinator = Resources.FindObjectsOfTypeAll<SoloFreePlayFlowCoordinator>().First();
+
+            PlayerDataModelSO dataModel = freePlayCoordinator.GetPrivateField<PlayerDataModelSO>("_playerDataModel");
+            PlayerData currentLocalPlayer = dataModel.playerData;
+            PlayerLevelStatsData playerLevelStatsData = currentLocalPlayer.GetPlayerLevelStatsData(difficultyBeatmap.level.levelID, difficultyBeatmap.difficulty, difficultyBeatmap.parentDifficultyBeatmapSet.beatmapCharacteristic);
+            Plugin.log.Info($"Old highscore {playerLevelStatsData.highScore}");
+
+            PluginUI.instance.roomFlowCoordinator.lastResults = levelCompletionResults;
+            PluginUI.instance.roomFlowCoordinator.lastHighScore = playerLevelStatsData.highScore;
             if (Config.Instance.SubmitScores == 0)
             {
                 Plugin.log.Warn("Score submission is disabled!");
@@ -993,17 +1006,6 @@ namespace BeatSaberMultiplayer
                     return;
                 }
             }
-
-            AchievementsEvaluationHandler achievementsHandler = Resources.FindObjectsOfTypeAll<AchievementsEvaluationHandler>().First();
-            achievementsHandler.ProcessLevelFinishData(difficultyBeatmap, levelCompletionResults);
-            achievementsHandler.ProcessSoloFreePlayLevelFinishData(difficultyBeatmap, levelCompletionResults);
-
-            SoloFreePlayFlowCoordinator freePlayCoordinator = Resources.FindObjectsOfTypeAll<SoloFreePlayFlowCoordinator>().First();
-
-            PlayerDataModelSO dataModel = freePlayCoordinator.GetPrivateField<PlayerDataModelSO>("_playerDataModel");
-            PlayerData currentLocalPlayer = dataModel.playerData;
-            PlayerLevelStatsData playerLevelStatsData = currentLocalPlayer.GetPlayerLevelStatsData(difficultyBeatmap.level.levelID, difficultyBeatmap.difficulty, difficultyBeatmap.parentDifficultyBeatmapSet.beatmapCharacteristic);
-
             currentLocalPlayer.playerAllOverallStatsData.soloFreePlayOverallStatsData.UpdateWithLevelCompletionResults(levelCompletionResults);
             playerLevelStatsData.IncreaseNumberOfGameplays();
             if (levelCompletionResults.levelEndStateType == LevelCompletionResults.LevelEndStateType.Cleared)
@@ -1013,7 +1015,7 @@ namespace BeatSaberMultiplayer
                 freePlayCoordinator.GetPrivateField<PlatformLeaderboardsModel>("_platformLeaderboardsModel").AddScoreFromComletionResults(difficultyBeatmap, levelCompletionResults);
                 Plugin.log.Info("Score submitted!");
             }
-            currentLocalPlayer.playerAllOverallStatsData.soloFreePlayOverallStatsData.UpdateWithLevelCompletionResults(levelCompletionResults);
+            Plugin.log.Info($"New highscore {playerLevelStatsData.highScore}");
             dataModel.Save();
         }
 

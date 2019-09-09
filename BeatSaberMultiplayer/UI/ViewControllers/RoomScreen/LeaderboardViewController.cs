@@ -25,6 +25,7 @@ namespace BeatSaberMultiplayer
         private LeaderboardTableCell _leaderboardTableCellInstance;
         private TextMeshProUGUI _timerText;
         private TextMeshProUGUI _progressText;
+        private TextMeshProUGUI _lastHighscoreText;
         private Button _pageUpButton;
         private Button _pageDownButton;
         private Button _playNowButton;
@@ -126,6 +127,12 @@ namespace BeatSaberMultiplayer
                 _timerText.fontSize = 8f;
                 _timerText.alignment = TextAlignmentOptions.Center;
                 _timerText.rectTransform.sizeDelta = new Vector2(30f, 6f);
+
+                _lastHighscoreText = BeatSaberUI.CreateText(rectTransform, "Last Highscore", new Vector2(45f, -35f));
+                _lastHighscoreText.alignment = TextAlignmentOptions.Right;
+                _lastHighscoreText.color = Color.white;
+                _lastHighscoreText.fontSize = 5f;
+                _lastHighscoreText.gameObject.SetActive(false);
             }
 
         }
@@ -137,7 +144,8 @@ namespace BeatSaberMultiplayer
 
             if (scores == null)
                 return;
-            
+            scores.Sort();
+
             if (scores.Count != _tableCells.Count)
             {
                 for (int i = 0; i < _tableCells.Count; i++)
@@ -173,10 +181,23 @@ namespace BeatSaberMultiplayer
             _leaderboardTableView.ScrollToCellWithIdx(0, TableViewScroller.ScrollPositionType.Beginning, false);
         }
 
-        public void SetSong(SongInfo info)
+        public void SetSong(SongInfo info, Boolean finished)
         {
             if (_songTableCell == null)
                 return;
+
+            if (finished)
+            {
+                var highscore = PluginUI.instance.roomFlowCoordinator.lastHighScore;
+                if (highscore == 0)
+                    _lastHighscoreText.SetText("No previous highscore");
+                else
+                    _lastHighscoreText.SetText($"Previous highscore: {highscore}");
+                _lastHighscoreText.gameObject.SetActive(true);
+            } else
+            {
+                _lastHighscoreText.gameObject.SetActive(false);
+            }
             
             _selectedSong = SongCore.Loader.CustomBeatmapLevelPackCollectionSO.beatmapLevelPacks.SelectMany(x => x.beatmapLevelCollection.beatmapLevels).FirstOrDefault(x => x.levelID.StartsWith(info.levelId));
 
