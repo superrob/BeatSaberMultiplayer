@@ -90,7 +90,7 @@ namespace BeatSaberMultiplayer.UI.UIElements
         {
             set
             {
-                if(value <= 0)
+                if (value <= 0)
                 {
                     _rankText.text = "";
                 }
@@ -132,11 +132,6 @@ namespace BeatSaberMultiplayer.UI.UIElements
         private bool _transferHostButtonEnabled;
         private bool _muteButtonEnabled;
 
-        protected override void Awake()
-        {
-            base.Awake();
-        }
-
         public void Init()
         {
             LeaderboardTableCell cell = GetComponent<LeaderboardTableCell>();
@@ -150,7 +145,7 @@ namespace BeatSaberMultiplayer.UI.UIElements
 
             reuseIdentifier = "PlayerCell";
 
-            if(_buttonStrokeSprite == null)
+            if (_buttonStrokeSprite == null)
             {
                 _buttonStrokeSprite = Resources.FindObjectsOfTypeAll<Sprite>().First(x => x.name == "RoundRectSmallStroke");
             }
