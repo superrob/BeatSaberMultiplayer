@@ -68,6 +68,9 @@ namespace BeatSaberMultiplayer
         //https://www.materialui.co/icon/loop
         public static Sprite refreshIcon;
 
+        //Loaned from SongBrowser https://github.com/halsafar/BeatSaberSongBrowser/blob/master/SongBrowserPlugin/Assets/
+        public static Sprite randomIcon;
+
         public static void ConvertSprites()
         {
             onlineIcon =            CustomUI.Utilities.UIUtilities.LoadSpriteFromResources("BeatSaberMultiplayer.Assets.OnlineIcon.png");
@@ -110,6 +113,9 @@ namespace BeatSaberMultiplayer
 
             ratingIcon =            CustomUI.Utilities.UIUtilities.LoadSpriteFromResources("BeatSaberMultiplayer.Assets.RatingIcon.png");
             ratingIcon.texture.wrapMode = TextureWrapMode.Clamp;
+
+            randomIcon = CustomUI.Utilities.UIUtilities.LoadSpriteFromResources("BeatSaberMultiplayer.Assets.RandomIcon.png");
+            randomIcon.texture.wrapMode = TextureWrapMode.Clamp;
         }
     }
 }

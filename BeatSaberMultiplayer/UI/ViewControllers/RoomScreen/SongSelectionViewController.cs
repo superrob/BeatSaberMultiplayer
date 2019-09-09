@@ -33,10 +33,12 @@ namespace BeatSaberMultiplayer.UI.ViewControllers.RoomScreen
 
         private Button _sortByButton;
         private Button _searchButton;
+        private Button _randomButton;
 
         private Button _defButton;
         private Button _newButton;
         private Button _diffButton;
+        private Button _rankedButton;
 
         TextMeshProUGUI _hostIsSelectingSongText;
 
@@ -54,7 +56,9 @@ namespace BeatSaberMultiplayer.UI.ViewControllers.RoomScreen
 
                 _songTableCellInstance = Resources.FindObjectsOfTypeAll<LevelListTableCell>().First(x => (x.name == "LevelListTableCell"));
 
-                _searchButton = this.CreateUIButton("CancelButton", new Vector2(-15f, 36.5f), new Vector2(30f, 6f), () => { SearchPressed?.Invoke(); }, "Search");
+                _searchButton = this.CreateUIButton("CancelButton", new Vector2(-15f, 36.5f), new Vector2(30f, 6f), () => {
+                    SearchPressed?.Invoke();
+                }, "Search");
                 _searchButton.SetButtonTextSize(3f);
                 _searchButton.ToggleWordWrapping(false);
 
@@ -65,18 +69,35 @@ namespace BeatSaberMultiplayer.UI.ViewControllers.RoomScreen
                 _sortByButton.SetButtonTextSize(3f);
                 _sortByButton.ToggleWordWrapping(false);
 
-                _defButton = this.CreateUIButton("CancelButton", new Vector2(-20f, 36.5f), new Vector2(20f, 6f), () =>
+                _randomButton = this.CreateUIButton("PracticeButton", new Vector2(35f, 36.5f), new Vector2(6.5f, 6.5f), () =>
+                {
+                    PickRandomSong();
+                }, "", Sprites.randomIcon);
+                var _randomButtonLayout = _randomButton.GetComponentsInChildren<HorizontalLayoutGroup>().First(x => x.name == "Content");
+                _randomButtonLayout.padding = new RectOffset(0, 0, 1, 1);
+
+                _defButton = this.CreateUIButton("CancelButton", new Vector2(-30f, 36.5f), new Vector2(20f, 6f), () =>
                 {
                     SelectTopButtons(TopButtonsState.Select);
                     SortPressed?.Invoke(SortMode.Default);
-                },
-                "Default");
+                }, "Default");
 
                 _defButton.SetButtonTextSize(3f);
                 _defButton.ToggleWordWrapping(false);
                 _defButton.gameObject.SetActive(false);
 
-                _newButton = this.CreateUIButton("CancelButton", new Vector2(0f, 36.5f), new Vector2(20f, 6f), () =>
+                _rankedButton = this.CreateUIButton("CancelButton", new Vector2(-10f, 36.5f), new Vector2(20f, 6f), () =>
+                {
+                    SelectTopButtons(TopButtonsState.Select);
+                    SortPressed?.Invoke(SortMode.Ranked);
+                }, "Ranked");
+
+                _rankedButton.SetButtonTextSize(3f);
+                _rankedButton.ToggleWordWrapping(false);
+                _rankedButton.gameObject.SetActive(false);
+
+
+                _newButton = this.CreateUIButton("CancelButton", new Vector2(10f, 36.5f), new Vector2(20f, 6f), () =>
                 {
                     SelectTopButtons(TopButtonsState.Select);
                     SortPressed?.Invoke(SortMode.Newest);
@@ -86,8 +107,7 @@ namespace BeatSaberMultiplayer.UI.ViewControllers.RoomScreen
                 _newButton.ToggleWordWrapping(false);
                 _newButton.gameObject.SetActive(false);
 
-
-                _diffButton = this.CreateUIButton("CancelButton", new Vector2(20f, 36.5f), new Vector2(20f, 6f), () =>
+                _diffButton = this.CreateUIButton("CancelButton", new Vector2(30f, 36.5f), new Vector2(20f, 6f), () =>
                 {
                     SelectTopButtons(TopButtonsState.Select);
                     SortPressed?.Invoke(SortMode.Difficulty);
@@ -226,6 +246,13 @@ namespace BeatSaberMultiplayer.UI.ViewControllers.RoomScreen
             }
         }
 
+        public void PickRandomSong()
+        {
+            if (availableSongs.Count() == 0)
+                return;
+            SongSelected?.Invoke(availableSongs.Random());
+        }
+
         public void ScrollToLevel(string levelId)
         {
             if (availableSongs.Any(x => x.levelID == levelId))
@@ -248,6 +275,7 @@ namespace BeatSaberMultiplayer.UI.ViewControllers.RoomScreen
 
             _sortByButton.gameObject.SetActive(isHost);
             _searchButton.gameObject.SetActive(isHost);
+            _randomButton.gameObject.SetActive(isHost);
 
             _fastPageUpButton.gameObject.SetActive(isHost);
             _fastPageDownButton.gameObject.SetActive(isHost);
@@ -261,38 +289,47 @@ namespace BeatSaberMultiplayer.UI.ViewControllers.RoomScreen
                     {
                         _sortByButton.gameObject.SetActive(true);
                         _searchButton.gameObject.SetActive(true);
+                        _randomButton.gameObject.SetActive(true);
 
                         _defButton.gameObject.SetActive(false);
                         _newButton.gameObject.SetActive(false);
                         _diffButton.gameObject.SetActive(false);
+                        _rankedButton.gameObject.SetActive(false);
                     }; break;
                 case TopButtonsState.SortBy:
                     {
                         _sortByButton.gameObject.SetActive(false);
                         _searchButton.gameObject.SetActive(false);
+                        _randomButton.gameObject.SetActive(false);
 
                         _defButton.gameObject.SetActive(true);
                         _newButton.gameObject.SetActive(true);
                         _diffButton.gameObject.SetActive(true);
                         _diffButton.interactable = ScrappedData.Downloaded;
+                        _rankedButton.gameObject.SetActive(true);
+                        _rankedButton.interactable = ScrappedData.Downloaded;
                     }; break;
                 case TopButtonsState.Search:
                     {
                         _sortByButton.gameObject.SetActive(false);
                         _searchButton.gameObject.SetActive(false);
+                        _randomButton.gameObject.SetActive(false);
 
                         _defButton.gameObject.SetActive(false);
                         _newButton.gameObject.SetActive(false);
                         _diffButton.gameObject.SetActive(false);
+                        _rankedButton.gameObject.SetActive(false);
                     }; break;
                 case TopButtonsState.Mode:
                     {
                         _sortByButton.gameObject.SetActive(false);
                         _searchButton.gameObject.SetActive(false);
+                        _randomButton.gameObject.SetActive(false);
 
                         _defButton.gameObject.SetActive(false);
                         _newButton.gameObject.SetActive(false);
                         _diffButton.gameObject.SetActive(false);
+                        _rankedButton.gameObject.SetActive(false);
                     }; break;
             }
         }

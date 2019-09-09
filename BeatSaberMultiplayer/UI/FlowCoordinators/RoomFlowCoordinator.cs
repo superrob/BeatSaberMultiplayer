@@ -21,7 +21,7 @@ using VRUI;
 
 namespace BeatSaberMultiplayer.UI.FlowCoordinators
 {
-    public enum SortMode { Default, Difficulty, Newest };
+    public enum SortMode { Default, Difficulty, Newest, Ranked };
 
     class RoomFlowCoordinator : FlowCoordinator
     {
@@ -42,6 +42,9 @@ namespace BeatSaberMultiplayer.UI.FlowCoordinators
             }
             private set { _songPreviewPlayer = value; }
         }
+        
+        public LevelCompletionResults lastResults;
+        public int lastHighScore;
 
         AdditionalContentModelSO _contentModelSO;
         BeatmapLevelsModelSO _beatmapLevelsModel;
@@ -539,7 +542,7 @@ namespace BeatSaberMultiplayer.UI.FlowCoordinators
                         if (_roomNavigationController.viewControllers.IndexOf(_leaderboardViewController) == -1)
                             PopAllViewControllers();
 
-                        ShowLeaderboard(null, roomInfo.selectedSong);
+                        ShowLeaderboard(null, roomInfo.selectedSong, false);
                     }
                     break;
                 case RoomState.Results:
@@ -547,7 +550,7 @@ namespace BeatSaberMultiplayer.UI.FlowCoordinators
                         if (_roomNavigationController.viewControllers.IndexOf(_leaderboardViewController) == -1)
                             PopAllViewControllers();
 
-                        ShowLeaderboard(null, roomInfo.selectedSong);
+                        ShowLeaderboard(null, roomInfo.selectedSong, true);
                     }
                     break;
             }
@@ -826,7 +829,28 @@ namespace BeatSaberMultiplayer.UI.FlowCoordinators
                                     else
                                         return -1;
                                 }).ToList();
-                            }; break;
+                            };
+                            break;
+                        case SortMode.Ranked:
+                            {
+                                levels = levels.AsParallel().OrderByDescending(x =>
+                                {
+                                    var diffs = ScrappedData.Songs.FirstOrDefault(y => x.levelID.Contains(y.Hash)).Diffs;
+                                    if (diffs != null && diffs.Count > 0) {
+                                        int rankedAmount = 0;
+                                        diffs.ForEach((DifficultyStats stats) =>
+                                        {
+                                            if (stats.Ranked != 0)
+                                            {
+                                                rankedAmount++;
+                                            }
+                                        });
+                                        return rankedAmount;
+                                    } else
+                                        return -1;
+                                }).ToList();
+                            };
+                            break;
                     }
                 }
                 else
@@ -1059,7 +1083,7 @@ namespace BeatSaberMultiplayer.UI.FlowCoordinators
             }
         }
 
-        public void ShowLeaderboard(List<PlayerInfo> playerInfos, SongInfo song)
+        public void ShowLeaderboard(List<PlayerInfo> playerInfos, SongInfo song, Boolean finished)
         {
             if (_leaderboardViewController == null)
             {
@@ -1082,7 +1106,7 @@ namespace BeatSaberMultiplayer.UI.FlowCoordinators
                     });
             }
             _leaderboardViewController.SetLeaderboard();
-            _leaderboardViewController.SetSong(song);
+            _leaderboardViewController.SetSong(song, finished);
         }
 
         public void HideLeaderboard()
